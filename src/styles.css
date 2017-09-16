@@ -32,6 +32,21 @@ body {
   color: #ffffff;
 }
 
+/* Make header draggabale */
+#header {
+  -webkit-app-region:drag;
+}
+
+#header input[type="submit"],
+input[type="reset"],
+input[type="button"],
+input[type="text"],
+button,
+a,
+textarea {
+  -webkit-app-region:no-drag;
+}
+
 /* Debugging Layouts
 @media screen and (min-width: 64.063em) {
   .ui-lg-3 {
@@ -51,4 +66,3 @@ body {
   }
 }
 */
-
