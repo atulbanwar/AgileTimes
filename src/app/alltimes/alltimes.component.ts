@@ -27,7 +27,11 @@ export class AlltimesComponent implements OnInit {
 
   selectedRows: Array<any>;
 
+  ContextMenu: MenuItem[];
   contextMenu: MenuItem[];
+
+  onRowSelect() {
+  };
 
   recordCount : number;
 
@@ -79,11 +83,11 @@ export class AlltimesComponent implements OnInit {
     this.display = true;
   }
 
-  onCancel() {
+  onCancelTimesheet() {
     this.display = false;
   }
 
-  onAdd() {
+  onAddTimesheet() {
     const user = this.newTime.value.User;
     const project = this.newTime.value.Project;
     const category = this.newTime.value.Category;
@@ -116,4 +120,5 @@ export class AlltimesComponent implements OnInit {
     });
     this.display = false;
   }
+
 }
