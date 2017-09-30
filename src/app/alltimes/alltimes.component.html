@@ -45,4 +45,20 @@
 
   <p-contextMenu #tableContextMenu [model]="contextMenu"></p-contextMenu>
 
+  <button pButton type="button" label="Add Time" (click)="onAddTime($event)"></button>
+  
+  <p-dialog header="Add Timesheet" [(visible)]="display" [width]="500">
+    <form [formGroup]="newTime" (ngSubmit)="onAdd($event)">
+        <div><input type="text" formControlName="User" pInputText placeholder="User" class="ui-g-12"></div>
+        <div><input type="text" formControlName="Project" pInputText placeholder="Project" class="ui-g-12"></div>
+        <div><input type="text" formControlName="Category" pInputText placeholder="Category" class="ui-g-12"></div>
+        <div><input type="number" formControlName="StartTime" pInputText placeholder="Start Time" class="ui-g-12"></div>
+        <div><input type="number" formControlName="EndTime" pInputText placeholder="End Time" class="ui-g-12"></div>
+    
+        <div>
+          <button pButton type="button" label="Cancel" (click)="onCancel($event)"></button>
+          <button pButton type="submit" label="Add" ></button>
+        </div>
+    </form>
+  </p-dialog>
 </div>
