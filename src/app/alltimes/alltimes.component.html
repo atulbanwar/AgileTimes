@@ -15,7 +15,7 @@
 
   <p-dataTable #dt [value]="allTimesheetData" class="ui-g-12" sortField="startTime" sortOrder="1" emptyMessage="No time entries found"
     [reorderableColumns]="true" columnResizeMode="fit" [resizableColumns]="true" [globalFilter]="tableSearch" exportFilename="users"
-    [editable]="true" (onEditComplete)="onEditComplete($event)" [(selection)]="selectedRows" (onRowSelect)="onRowSelect($event)"
+    [editable]="true" (onEditComplete)="onEditComplete($event)" [(selection)]="selectedRows" (onRowSelect)="onRowSelect()"
     [contextMenu]="tableContextMenu" [paginator]="true" [rows]="5" [rowsPerPageOptions]="[5,10,15,20]" [totalRecords]="recordCount"
     [pageLinks]="8">
 
@@ -45,4 +45,20 @@
 
   <p-contextMenu #tableContextMenu [model]="contextMenu"></p-contextMenu>
 
+  <button pButton type="button" label="Add Time" (click)="onAddTime($event)"></button>
+  
+  <p-dialog header="Add Timesheet" [(visible)]="display" [width]="500">
+    <form [formGroup]="newTime" (ngSubmit)="onAddTimesheet()">
+        <div><input type="text" formControlName="User"  placeholder="User" class="ui-g-12"></div>
+        <div><input type="text" formControlName="Project"  placeholder="Project" class="ui-g-12"></div>
+        <div><input type="text" formControlName="Category"   placeholder="Category" class="ui-g-12"></div>
+        <div><input type="number" formControlName="StartTime"  placeholder="Start Time" class="ui-g-12"></div>
+        <div><input type="number" formControlName="EndTime"  placeholder="End Time" class="ui-g-12"></div>
+    
+        <div>
+          <button pButton type="button" label="Cancel" (click)="onCancelTimesheet()"></button>
+          <button pButton type="submit" label="Add" ></button>
+        </div>
+    </form>
+  </p-dialog>
 </div>
