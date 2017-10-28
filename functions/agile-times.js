@@ -40,7 +40,7 @@ function getWelcomeResponse(callback) {
     const sessionAttributes = {};
     const cardTitle = 'Welcome';
     const speechOutput = 'Welcome to agile times. ' +
-    'Please add new timesheet by saying, add timesheet to Project name and category.';
+        'Please add new timesheet by saying, add timesheet to Project name and category.';
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
     const repromptText = 'Please add new timesheet by saying, ' +
@@ -79,11 +79,14 @@ function addTimesheet(intent, session, callback) {
     const shouldEndSession = true;
     let speechOutput = '';
 
-    if (projectSlot && typeof(projectSlot.value) !== 'undefined') {
+    if (projectSlot && typeof (projectSlot.value) !== 'undefined') {
         const project = projectSlot.value;
         const category = categorySlot.value;
         sessionAttributes = createAttributes(project, category);
-        speechOutput = categorySlot && typeof(categorySlot.value) !== 'undefined' ? `Got it Atul Banwar. Adding new timesheet to ${project} project, ${category} category.` : `Got it Atul Banwar. Adding new timesheet to ${project} project.`;
+        speechOutput = categorySlot && typeof (categorySlot.value) !== 'undefined' ? `Got it. Adding new timesheet to ${project} project, ${category} category.` : `Got it. Adding new timesheet to ${project} project.`;
+
+        createNewTimeSheet(project, category);
+
     } else {
         speechOutput = "I couldn't find that project name. Please try again.";
     }
@@ -93,6 +96,103 @@ function addTimesheet(intent, session, callback) {
     // will end.
     callback(sessionAttributes,
         buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
+}
+
+function createNewTimeSheet(projectName, categoryName) {
+
+    var variables = {
+        user: 'Atul Banwar',
+        project: projectName,
+        category: categoryName ? categoryName : '',
+        startTime: 12,
+        endTime: 18,
+        date: new Date()
+    };
+
+    var client = require('graphql-client')({ url: 'https://api.graph.cool/simple/v1/cj7wl7lhb0ivx0138alljau37' });
+
+    client.query(`
+        mutation createTimesheet ($user: String!, $project: String!, $category: String!, $startTime: Int!, $endTime: Int!, $date: DateTime!) {
+            createTimesheet(user: $user, project: $project, category: $category, startTime: $startTime, endTime: $endTime, date: $date ) {
+                id
+            }
+        }`, variables, function (req, res) {
+            if (res.status === 401) {
+                throw new Error('Not authorized');
+            }
+        })
+        .then(function (body) {
+            console.log(body);
+        })
+        .catch(function (err) {
+            console.log(err.message);
+        });
+
+}
+
+/**
+ * Deletes all timesheets.
+ */
+function deleteAllTimesheets(intent, session, callback) {
+    let repromptText = null;
+    let sessionAttributes = {};
+    const shouldEndSession = true;
+    let speechOutput = '';
+
+    //sessionAttributes = createAttributes(project, category);
+	speechOutput = `Got it. Deleting all timesheets.`;
+
+    deleteAllTimesheetsFromGraphCool();
+
+    // Setting repromptText to null signifies that we do not want to reprompt the user.
+    // If the user does not respond or says something that is not understood, the session
+    // will end.
+    callback(sessionAttributes,
+        buildSpeechletResponse(intent.name, speechOutput, repromptText, shouldEndSession));
+}
+
+function deleteAllTimesheetsFromGraphCool() {
+
+    var client = require('graphql-client')({ url: 'https://api.graph.cool/simple/v1/cj7wl7lhb0ivx0138alljau37' });
+
+    client.query(`
+        query allTimesheets {
+            allTimesheets {
+                id
+            }
+        }`, function (req, res) {
+            if (res.status === 401) {
+                throw new Error('Not authorized');
+            }
+        })
+        .then(function (body) {
+			for (var item in body.data.allTimesheets) {
+				//console.log('id: ' + body.data.allTimesheets[item].id);
+
+				client.query(`
+				mutation deleteTimesheet ($id: ID!) {
+					deleteTimesheet(id: $id) {
+						id
+					}
+				}`, {id: body.data.allTimesheets[item].id}, function (req, res) {
+					if (res.status === 401) {
+						console.log('Not authorized');
+						throw new Error('Not authorized');
+					}
+				})
+				.then(function (body) {
+					console.log(body);
+				})
+				.catch(function (err) {
+					console.log(err.message);
+				});
+
+			}
+        })
+        .catch(function (err) {
+            console.log(err.message);
+        });
+
 }
 
 // --------------- Events -----------------------
@@ -127,6 +227,8 @@ function onIntent(intentRequest, session, callback) {
     // Dispatch to your skill's intent handlers
     if (intentName === 'AddTimesheetIntent') {
         addTimesheet(intent, session, callback);
+    } else if (intentName === 'DeleteAllTimesheetsIntent') {
+        deleteAllTimesheets(intent, session, callback);
     } else if (intentName === 'AMAZON.HelpIntent') {
         getWelcomeResponse(callback);
     } else if (intentName === 'AMAZON.StopIntent' || intentName === 'AMAZON.CancelIntent') {
